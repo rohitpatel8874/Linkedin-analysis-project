@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Hero Section -->
+<section class="bg-gray-50 py-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="lg:text-center">
+      <h2 class="text-base text-indigo-600 font-semibold tracking-wide uppercase">Welcome to LinkSolve</h2>
+      <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+        Your Gateway to Professional Connections
+      </p>
+      <p class="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
+        Discover opportunities, connect with professionals, and grow your career with LinkSolve.
+      </p>
+    </div>
+
+    <div class="mt-10 flex justify-center">
+      <a href="/login" class="py-3 px-6 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Get Started</a>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-12 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="lg:text-center">
+      <h2 class="text-base text-indigo-600 font-semibold tracking-wide uppercase">Features</h2>
+      <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+        Why Choose LinkSolve?
+      </p>
+    </div>
+
+    <div class="mt-10">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="text-center">
+          <div class="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white mx-auto">
+            <i class="fas fa-briefcase"></i>
+          </div>
+          <h3 class="mt-4 text-lg leading-6 font-medium text-gray-900">Job Opportunities</h3>
+          <p class="mt-2 text-base text-gray-500">
+            Explore thousands of job postings tailored to your skills and interests.
+          </p>
+        </div>
+
+        <div class="text-center">
+          <div class="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white mx-auto">
+            <i class="fas fa-users"></i>
+          </div>
+          <h3 class="mt-4 text-lg leading-6 font-medium text-gray-900">Professional Network</h3>
+          <p class="mt-2 text-base text-gray-500">
+            Connect with industry leaders and like-minded professionals.
+          </p>
+        </div>
+
+        <div class="text-center">
+          <div class="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white mx-auto">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h3 class="mt-4 text-lg leading-6 font-medium text-gray-900">Career Growth</h3>
+          <p class="mt-2 text-base text-gray-500">
+            Access resources and tools to advance your career.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="bg-indigo-600 py-12">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <h2 class="text-3xl font-extrabold text-white sm:text-4xl">
+      Ready to take the next step?
+    </h2>
+    <p class="mt-4 text-lg leading-6 text-indigo-200">
+      Join LinkSolve today and unlock your professional potential.
+    </p>
+    <div class="mt-6">
+      <a href="/Registration" class="py-3 px-6 bg-white text-indigo-600 rounded-lg hover:bg-gray-100">Sign Up Now</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
