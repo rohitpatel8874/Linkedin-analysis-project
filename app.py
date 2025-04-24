@@ -4,9 +4,9 @@ from flask_bcrypt import bcrypt
 from flask_sqlalchemy import SQLAlchemy
 import pandas as pd
 import matplotlib.pyplot as plt
-import geopandas as gpd
 import plotly.graph_objects as go
-
+import plotly.express as px
+import plotly.io as pio
 
 app = Flask(__name__)
 app.secret_key = 'supersecretmre'
@@ -36,6 +36,10 @@ class User(db.Model):
 with app.app_context():
     db.create_all()
 
+
+
+fig4 = go.Figure()
+df = pd.read_csv('jobs.csv')
 
 @app.route('/')
 def index():
@@ -84,11 +88,72 @@ def register():
 
 
 
-#Graphs work
+#Graphs functions
 
 #common job titles
 def common_job_titles():
-    fig1 = 
+    fig1 = go.Figure()
+    top_titles = df['title'].value_counts().nlargest(15).reset_index()
+    top_titles.columns = ['Job Title', 'Count']
+
+    fig1 = px.bar(top_titles, x='Job Title', y='Count',
+              title="Top 15 Most Common Job Titles",
+              color='Count', text='Count')
+    fig1.update_layout(xaxis_tickangle=-45)
+
+    graph1_html = pio.to_html(fig1, full_html=False)
+    return graph1_html
+
+# Distribution of Employment Types
+def employment_type_distribution():
+    fig2 = go.Figure()
+    employment_dist = df['Employment type'].value_counts().reset_index()
+    employment_dist.columns = ['Employment Type', 'Count']
+
+    fig2 = px.pie(employment_dist, names='Employment Type', values='Count',
+              title="Distribution of Employment Types",
+              hole=0.3)
+    graph2_html = pio.to_html(fig2, full_html=False)
+    return graph2_html   # Donut style
+
+
+# Distribution of Seniority Levels
+def seniority_level_distribution():
+    fig3 = go.Figure()
+    fig3 = px.histogram(df, x='Seniority level',
+                    title="Distribution of Seniority Levels",
+                    color='Seniority level')
+    fig3.update_layout(xaxis_title='Seniority Level', yaxis_title='Count')
+    graph3_html = pio.to_html(fig3, full_html=False)
+    return graph3_html   # Donut style
+
+   
+
+
+# Seniority Level by Employment Type
+def seniority_level_by_employment_type():
+    fig4 = go.Figure()
+    combo = df.groupby(['Employment type', 'Seniority level']).size().reset_index(name='Count')
+
+    fig4 = px.bar(combo, x='Employment type', y='Count', color='Seniority level',
+              title="Seniority Level by Employment Type",
+              barmode='stack')
+    graph4_html = pio.to_html(fig4, full_html=False)
+    return graph4_html   # Donut style
+
+
+#analysis page routes
+@app.route('/job_analysis')
+def job_analysis():
+    # Generate the graphs
+    graph1_html = common_job_titles()
+    graph2_html = employment_type_distribution()
+    graph3_html = seniority_level_distribution()
+    graph4_html = seniority_level_by_employment_type() 
+
+    # Add more graphs as needed
+    return render_template('job_analysis.html', graph1_html=graph1_html, graph2_html=graph2_html, graph3_html=graph3_html, graph4_html=graph4_html)
+
 
 
 
