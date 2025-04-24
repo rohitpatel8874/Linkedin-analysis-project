@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 import pandas as pd
 import matplotlib.pyplot as plt
 import geopandas as gpd
-import folium
+import plotly.graph_objects as go
 
 
 app = Flask(__name__)
@@ -35,49 +35,6 @@ class User(db.Model):
 
 with app.app_context():
     db.create_all()
-
-# Load the dataset
-df = pd.read_csv("Analysis/linkedin-company-information.csv")
-
-# Group by country and count the number of companies
-country_counts = df['Country'].value_counts().reset_index()
-country_counts.columns = ['Country', 'CompanyCount']
-
-# Load a world shapefile for mapping
-world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
-
-# Merge the country data with the world shapefile
-world = world.merge(country_counts, how='left', left_on='name', right_on='Country')
-
-# Create a folium map
-m = folium.Map(location=[0, 0], zoom_start=2)
-
-# Add a choropleth layer
-folium.Choropleth(
-    geo_data=world,
-    name='choropleth',
-    data=world,
-    columns=['name', 'CompanyCount'],
-    key_on='feature.properties.name',
-    fill_color='YlGnBu',
-    fill_opacity=0.7,
-    line_opacity=0.2,
-    legend_name='Number of Companies'
-).add_to(m)
-
-# Save the map to an HTML file
-m.save('static/img/company_distribution_heatmap.html')
-
-# Plot the bar chart
-plt.figure(figsize=(10, 6))
-country_counts.set_index('Country')['CompanyCount'].plot(kind='bar', color='skyblue')
-plt.title('Top 10 Countries with the Most Companies')
-plt.xlabel('Country')
-plt.ylabel('Number of Companies')
-plt.xticks(rotation=45)
-plt.tight_layout()
-plt.savefig('static/img/top_10_countries_bar_chart.png')
-plt.show()
 
 
 @app.route('/')
@@ -124,6 +81,16 @@ def register():
         flash('Registration successful', 'success')
         return redirect(url_for('login'))
     return render_template('Registration.html')
+
+
+
+#Graphs work
+
+#common job titles
+def common_job_titles():
+    fig1 = 
+
+
 
 
 if __name__ == '__main__':
