@@ -142,6 +142,20 @@ def seniority_level_by_employment_type():
     return graph4_html   # Donut style
 
 
+
+# Top 10 Companies by Job Postings
+def top_companies():
+    fig5 = go.Figure()  
+    top_companies = df['company'].value_counts().nlargest(10).reset_index()
+    top_companies.columns = ['Company', 'Postings']
+
+    fig5 = px.pie(top_companies, names='Company', values='Postings',
+                title="Top 10 Companies by Job Postings",
+                hole=0.4)
+    graph5_html = pio.to_html(fig5, full_html=False)
+    return graph5_html   # Donut style
+
+
 #analysis page routes
 @app.route('/job_analysis')
 def job_analysis():
@@ -149,10 +163,10 @@ def job_analysis():
     graph1_html = common_job_titles()
     graph2_html = employment_type_distribution()
     graph3_html = seniority_level_distribution()
-    graph4_html = seniority_level_by_employment_type() 
-
+    graph4_html = seniority_level_by_employment_type()
+    graph5_html = top_companies()
     # Add more graphs as needed
-    return render_template('job_analysis.html', graph1_html=graph1_html, graph2_html=graph2_html, graph3_html=graph3_html, graph4_html=graph4_html)
+    return render_template('job_analysis.html', graph1_html=graph1_html, graph2_html=graph2_html, graph3_html=graph3_html, graph4_html=graph4_html, graph5_html=graph5_html)
 
 
 
