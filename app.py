@@ -37,8 +37,6 @@ with app.app_context():
     db.create_all()
 
 
-
-fig4 = go.Figure()
 df = pd.read_csv('jobs.csv')
 
 @app.route('/')
@@ -155,8 +153,158 @@ def top_companies():
     graph5_html = pio.to_html(fig5, full_html=False)
     return graph5_html   # Donut style
 
+#industry analysis page routes
+def industries_by_job_volume():
+    fig1 = go.Figure()  
+    top_industries = df['Industries'].value_counts().nlargest(15).reset_index()
+    top_industries.columns = ['Industry', 'Job Count']
 
-#analysis page routes
+    fig1 = px.bar(top_industries, x='Industry', y='Job Count',
+            title="Top 15 Industries by Job Postings",
+            color='Job Count', text='Job Count')
+    fig1.update_layout(xaxis_tickangle=-45)
+    graph1_html = pio.to_html(fig1, full_html=False)
+    return graph1_html   # Donut style
+
+
+
+
+# Treemap of Job Functions Within Industries
+def job_functions_within_industries():
+    fig2 = go.Figure()
+    treemap_df = df.groupby(['Industries', 'Job function']).size().reset_index(name='Count')
+
+    fig2 = px.treemap(treemap_df, path=['Industries', 'Job function'], values='Count',
+        title="Treemap of Job Functions Within Industries")
+    graph2_html = pio.to_html(fig2, full_html=False) 
+    return graph2_html   # Donut style
+
+
+
+
+# Heatmap – Cross-tab of job function vs. industry
+def job_function_vs_industry_heatmap():
+    fig3 = go.Figure()
+    heatmap_data = df.groupby(['Job function', 'Industries']).size().reset_index(name='Count')
+    heatmap_pivot = heatmap_data.pivot(index='Job function', columns='Industries', values='Count').fillna(0)
+
+    fig3 = px.imshow(heatmap_pivot,
+                 labels=dict(x="Industry", y="Job Function", color="Job Count"),
+                 title="Heatmap – Job Function by Industry")
+    fig3.update_xaxes(tickangle=-45)
+    graph3_html = pio.to_html(fig3, full_html=False)
+    return graph3_html   # Donut style
+
+
+
+# Bubble Chart – Job function popularity (size = number of postings)
+def job_function_popularity():
+    fig4 = go.Figure()
+    job_function_count = df['Job function'].value_counts().reset_index()
+    job_function_count.columns = ['Job Function', 'Count']
+
+    fig4 = px.scatter(job_function_count, x='Job Function', y='Count',
+                  size='Count', color='Job Function',
+                  title="Job Function Popularity",
+                  size_max=60)
+    fig4.update_layout(xaxis_tickangle=-45)
+    graph4_html = pio.to_html(fig4, full_html=False)
+    return graph4_html   # Donut style
+
+
+
+#Pie Chart – Share of top 10 job functions
+def job_function_share():
+    fig5 = go.Figure()
+    top_functions = df['Job function'].value_counts().nlargest(10).reset_index()
+    top_functions.columns = ['Job Function', 'Count']
+
+    fig5 = px.pie(top_functions, names='Job Function', values='Count',
+              title="Top 10 Job Functions Distribution")
+    graph5_html = pio.to_html(fig5, full_html=False)
+    return graph5_html   # Donut style
+
+
+
+                                                                       # Salary_Distribution_&_Trends file
+# Box Plot – Salary Ranges by Job Function
+def salary_ranges_by_job_function():
+    fig1 = go.Figure()
+    df['sal_low'] = pd.to_numeric(df['sal_low'], errors='coerce')
+    df['sal_high'] = pd.to_numeric(df['sal_high'], errors='coerce')
+    df['avg_salary'] = (df['sal_low'] + df['sal_high']) / 2
+    fig1 = px.box(df, x='Job function', y='avg_salary', points='all',
+              title='Salary Ranges by Job Function',
+              color='Job function')
+    fig1.update_layout(xaxis_tickangle=-45, yaxis_title='Average Salary')
+    graph1_html = pio.to_html(fig1, full_html=False)
+    return graph1_html   # Donut style
+
+
+
+
+# Violin Plot – Salary Spread by Seniority Level
+def salary_spread_by_seniority_level():
+    fig2 = go.Figure()
+    fig2 = px.violin(df, x='Seniority level', y='avg_salary', box=True, points="all",
+                 title='Salary Distribution by Seniority Level',
+                 color='Seniority level')
+    fig2.update_layout(xaxis_tickangle=-45, yaxis_title='Average Salary')
+    
+    graph2_html = pio.to_html(fig2, full_html=False)
+    return graph2_html   # Donut style
+
+
+
+
+# Histogram – Distribution of Average Salaries
+def salary():
+    fig3 = go.Figure()
+    fig3 = px.histogram(df, x='avg_salary',
+                    nbins=30,
+                    title='Distribution of Average Salaries',
+                    color_discrete_sequence=['indianred'])
+    fig3.update_layout(xaxis_title='Average Salary', yaxis_title='Job Count')
+    
+    graph3_html = pio.to_html(fig3, full_html=False)
+    return graph3_html   # Donut style
+
+
+
+# Scatter Plot – Experience vs. Average Salary
+def experience_vs_salary():
+    fig4 = go.Figure()
+    df['months_experience'] = pd.to_numeric(df['months_experience'], errors='coerce')
+
+    fig4 = px.scatter(df, x='months_experience', y='avg_salary',
+                  title='Experience vs. Average Salary',
+                  trendline='ols',  # adds regression line
+                  color='Job function')
+    fig4.update_layout(xaxis_title='Months of Experience', yaxis_title='Average Salary')
+    graph4_html = pio.to_html(fig4, full_html=False)
+    return graph4_html   # Donut style
+
+
+
+
+
+# Bar Chart – Top 15 Highest Paying Job Titles
+def top_15_highest_paying_job_titles():
+    fig5 = go.Figure()
+    title_salary = df.groupby('title')['avg_salary'].mean().nlargest(15).reset_index()
+
+    fig5 = px.bar(title_salary, x='title', y='avg_salary',
+              title='Top 15 Highest Paying Job Titles',
+              color='avg_salary', text='avg_salary')
+    fig5.update_layout(xaxis_tickangle=-45, yaxis_title='Average Salary')
+    
+    graph5_html = pio.to_html(fig5, full_html=False)
+    return graph5_html   # Donut style
+
+
+
+
+#analysis page routes 
 @app.route('/job_analysis')
 def job_analysis():
     # Generate the graphs
@@ -165,12 +313,37 @@ def job_analysis():
     graph3_html = seniority_level_distribution()
     graph4_html = seniority_level_by_employment_type()
     graph5_html = top_companies()
+
     # Add more graphs as needed
     return render_template('job_analysis.html', graph1_html=graph1_html, graph2_html=graph2_html, graph3_html=graph3_html, graph4_html=graph4_html, graph5_html=graph5_html)
 
 
 
+#analysis page routes
+@app.route('/industry_function_insights')
+def industries_by_volume():
+    # Generate the graphs
+    graph1_html = industries_by_job_volume()
+    graph2_html = job_functions_within_industries()
+    graph3_html = job_function_vs_industry_heatmap()
+    graph4_html = job_function_popularity()
+    graph5_html = job_function_share()
+    # Add more graphs as needed
+    return render_template('industry_function_insights.html', graph1_html=graph1_html,graph2_html=graph2_html, graph3_html=graph3_html, graph4_html=graph4_html, graph5_html=graph5_html)
 
+
+
+@app.route('/salary_distribution')
+def salary_distribution():
+    # Generate the graphs
+    graph1_html = salary_ranges_by_job_function()
+    graph2_html = salary_spread_by_seniority_level()
+    graph3_html = salary()
+    graph4_html = experience_vs_salary()
+    graph5_html = top_15_highest_paying_job_titles()
+
+    # Add more graphs as needed
+    return render_template('salary_distribution.html', graph1_html=graph1_html, graph2_html=graph2_html, graph3_html=graph3_html, graph4_html=graph4_html, graph5_html=graph5_html) 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000)
