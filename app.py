@@ -37,8 +37,6 @@ with app.app_context():
     db.create_all()
 
 
-
-fig4 = go.Figure()
 df = pd.read_csv('jobs.csv')
 
 @app.route('/')
@@ -98,11 +96,23 @@ def job_analysis():
     graph3_html = seniority_level_distribution()
     graph4_html = seniority_level_by_employment_type()
     graph5_html = top_companies()
+
     # Add more graphs as needed
     return render_template('job_analysis.html', graph1_html=graph1_html, graph2_html=graph2_html, graph3_html=graph3_html, graph4_html=graph4_html, graph5_html=graph5_html)
 
 
 
+#analysis page routes
+@app.route('/industry_function_insights')
+def industries_by_volume():
+    # Generate the graphs
+    graph1_html = industries_by_job_volume()
+    graph2_html = job_functions_within_industries()
+    graph3_html = job_function_vs_industry_heatmap()
+    graph4_html = job_function_popularity()
+    graph5_html = job_function_share()
+    # Add more graphs as needed
+    return render_template('industry_function_insights.html', graph1_html=graph1_html,graph2_html=graph2_html, graph3_html=graph3_html, graph4_html=graph4_html, graph5_html=graph5_html)
 
 
 #Graphs functions
@@ -308,4 +318,4 @@ def top_companies():
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000)
