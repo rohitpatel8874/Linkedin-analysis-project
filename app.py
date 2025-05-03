@@ -130,6 +130,16 @@ def salary_distribution():
 
 
 
+@app.route('/lExperience_& Seniority_Correlation')
+def experience_seniority_correlation():
+    graph1_html = salary_ranges_by_job_function()
+    graph2_html = salary_spread_by_seniority_level()
+    graph3_html = salary()
+    graph4_html = experience_vs_salary()
+
+    return render_template('experience_seniority_correlation.html', graph1_html=graph1_html, graph2_html=graph2_html, graph3_html=graph3_html)
+
+
 #Graphs functions
 
 #common job titles
@@ -477,6 +487,46 @@ def top_15_highest_paying_job_titles():
     
     graph5_html = pio.to_html(fig5, full_html=False)
     return graph5_html   # Donut style
+
+# Graph 4
+
+                   # 1
+# Box Plot – Experience Distribution by Seniority Level
+fig1 = px.box(df, x='Seniority level', y='months_experience', points='all',
+              title='Experience Distribution by Seniority Level',
+              color='Seniority level')
+fig1.update_layout(xaxis_tickangle=-45, yaxis_title='Months of Experience')
+
+
+
+                      # 2
+# Violin Plot – Experience Spread by Employment Type
+fig2 = px.violin(df, x='Employment type', y='months_experience', box=True, points="all",
+                 title='Experience Distribution by Employment Type',
+                 color='Employment type')
+fig2.update_layout(xaxis_tickangle=-45, yaxis_title='Months of Experience')
+
+
+                         # 3
+
+# Bar Chart – Average Experience Required per Seniority Level
+seniority_exp = df.groupby('Seniority level')['months_experience'].mean().reset_index()
+seniority_exp = seniority_exp.sort_values(by='months_experience', ascending=False)
+
+fig3 = px.bar(seniority_exp, x='Seniority level', y='months_experience',
+              title='Average Experience Required by Seniority Level',
+              color='months_experience', text='months_experience')
+fig3.update_layout(xaxis_tickangle=-45, yaxis_title='Average Months of Experience')
+
+
+
+
+# Histogram – Overall Experience Distribution (Across All Roles)
+fig4 = px.histogram(df, x='months_experience',
+                    nbins=30,
+                    title='Overall Experience Distribution in Job Posts',
+                    color_discrete_sequence=['darkcyan'])
+fig4.update_layout(xaxis_title='Months of Experience', yaxis_title='Job Count')
 
 
 
