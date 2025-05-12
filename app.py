@@ -130,14 +130,14 @@ def salary_distribution():
 
 
 
-@app.route('/lExperience_& Seniority_Correlation')
-def experience_seniority_correlation():
+@app.route('/experience_seniority')
+def experience_seniority():
     graph1_html = salary_ranges_by_job_function()
     graph2_html = salary_spread_by_seniority_level()
     graph3_html = salary()
     graph4_html = experience_vs_salary()
 
-    return render_template('experience_seniority_correlation.html', graph1_html=graph1_html, graph2_html=graph2_html, graph3_html=graph3_html)
+    return render_template('experience_seniority.html', graph1_html=graph1_html, graph2_html=graph2_html, graph3_html=graph3_html)
 
 
 #Graphs functions
@@ -531,4 +531,4 @@ fig4.update_layout(xaxis_title='Months of Experience', yaxis_title='Job Count')
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5000)
