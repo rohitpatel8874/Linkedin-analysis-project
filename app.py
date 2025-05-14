@@ -140,6 +140,24 @@ def experience_seniority():
     return render_template('experience_seniority.html', graph1_html=graph1_html, graph2_html=graph2_html, graph3_html=graph3_html)
 
 
+
+@app.route('/educatio_&_qualification')
+def education_qualification():
+    graph1_html = top_10_most_common_education_requirements()
+    graph2_html = distribution_of_education_requirements()  
+    graph3_html = education_level_within_seniority_levels()
+    graph4_html = education_requirements_across_industries()
+    graph5_html = education_requirements_by_employment_type()
+    
+
+  
+
+    # Add more graphs as needed
+    return render_template('education_qualification.html', graph1_html=graph1_html, graph2_html=graph2_html, graph3_html=graph3_html, graph4_html=graph4_html, graph5_html=graph5_html)
+
+
+
+
 #Graphs functions
 
 #common job titles
@@ -519,7 +537,7 @@ fig3 = px.bar(seniority_exp, x='Seniority level', y='months_experience',
 fig3.update_layout(xaxis_tickangle=-45, yaxis_title='Average Months of Experience')
 
 
-
+                            # 4
 
 # Histogram – Overall Experience Distribution (Across All Roles)
 fig4 = px.histogram(df, x='months_experience',
@@ -527,6 +545,81 @@ fig4 = px.histogram(df, x='months_experience',
                     title='Overall Experience Distribution in Job Posts',
                     color_discrete_sequence=['darkcyan'])
 fig4.update_layout(xaxis_title='Months of Experience', yaxis_title='Job Count')
+
+                           # graph 5
+                           # 1
+# Bar Chart – Most Common Education Requirements
+def top_10_most_common_education_requirements():
+    fig5 = go.Figure()
+    # Top 10 Most Common Education Requirements
+edu_counts = df['education'].value_counts().nlargest(10).reset_index()
+edu_counts.columns = ['Education Level', 'Job Count']
+
+fig1 = px.bar(edu_counts, x='Education Level', y='Job Count',
+              title='Top 10 Most Common Education Requirements',
+              color='Job Count', text='Job Count')
+fig1.update_layout(xaxis_tickangle=-45)
+
+
+                           # 2
+# Pie Chart – Distribution of Education Requirements
+def distribution_of_education_requirements():
+    fig2 = go.Figure()
+
+    graph2_html = pio.to_html(fig2, full_html=False)
+    return graph2_html   # Donut style
+top_edu_pie = df['education'].value_counts().nlargest(7).reset_index()
+top_edu_pie.columns = ['Education Level', 'Count']
+
+fig2 = px.pie(top_edu_pie, names='Education Level', values='Count',
+              title='Distribution of Education Requirements (Top 7)')
+
+
+
+                            # 3 
+# Sunburst Chart – Education Level within Seniority Levels
+def education_level_within_seniority_levels():
+    fig3 = go.Figure()
+    # Breakdown of Education Level within Seniority Levels
+edu_seniority = df.groupby(['Seniority level', 'education']).size().reset_index(name='Count')
+
+fig3 = px.sunburst(edu_seniority, path=['Seniority level', 'education'], values='Count',
+                   title='Breakdown of Education Level within Seniority Levels')
+
+                            # 4
+# Treemap – Education Level by Industry
+def education_requirements_across_industries():
+    fig4 = go.Figure()
+    # Education Requirements Across Industries
+edu_industry = df.groupby(['Industries', 'education']).size().reset_index(name='Count')
+
+fig4 = px.treemap(edu_industry, path=['Industries', 'education'], values='Count',
+                  title='Education Requirements Across Industries')
+
+                            # 5
+# Stacked Bar Chart – Education Requirements Across Employment Types
+def education_requirements_by_employment_type():
+    fig5 = go.Figure()
+    # Education Requirements by Employment Type
+edu_employment = df.groupby(['Employment type', 'education']).size().reset_index(name='Count')
+edu_pivot = edu_employment.pivot(index='Employment type', columns='education', values='Count').fillna(0)
+
+fig5 = go.Figure()
+
+for education in edu_pivot.columns:
+    fig5.add_trace(go.Bar(
+        x=edu_pivot.index,
+        y=edu_pivot[education],
+        name=education
+    ))
+
+fig5.update_layout(barmode='stack',
+                   title='Education Requirements by Employment Type',
+                   xaxis_title='Employment Type',
+                   yaxis_title='Job Count',
+                   xaxis_tickangle=-45)
+
+
 
 
 
