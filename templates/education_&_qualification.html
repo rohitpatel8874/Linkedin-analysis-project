@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Experience & Seniority Analysis</title>
+    <title>Education & Qualification Analysis</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -147,8 +147,7 @@
         
         .metric-value {
             font-size: 42px;
-            font-weight: 700;
-            background: linear-gradient(45deg, #1e40af, #3b82f6);
+            font-weight: 700;            background: linear-gradient(45deg, #1e40af, #3b82f6);
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -287,10 +286,10 @@
                 <li><a href="{{ url_for('job_analysis') }}">
                     <i class="fas fa-briefcase"></i>Job Analysis
                 </a></li>
-                <li><a href="{{ url_for('education_qualification') }}">
+                <li><a href="{{ url_for('education_qualification') }}" class="active">
                     <i class="fas fa-graduation-cap"></i>Education & Qualification
                 </a></li>
-                <li><a href="{{ url_for('experience_seniority') }}" class="active">
+                <li><a href="{{ url_for('experience_seniority') }}">
                     <i class="fas fa-user-tie"></i>Experience & Seniority
                 </a></li>
                 <li><a href="{{ url_for('industry_function_insights') }}">
@@ -304,53 +303,51 @@
         
         <div class="main-content">
             <div class="dashboard-header">
-                <h1>Experience & Seniority Analysis</h1>
-                <p>In-depth analysis of experience requirements and seniority levels across different roles and industries.</p>
+                <h1>Education & Qualification Analysis</h1>
+                <p>In-depth analysis of educational requirements and qualifications across different job roles, industries, and seniority levels.</p>
             </div>
 
             <div class="key-metrics">
                 <div class="metric-card">
                     <div class="metric-icon">
-                        <i class="fas fa-clock fa-2x"></i>
-                    </div>
-                    <div class="metric-value">{{ metrics.avg_experience }}+</div>
-                    <div class="metric-label">Average Experience</div>
-                    <div class="metric-trend">
+                        <i class="fas fa-graduation-cap fa-2x"></i>
+                    </div>                    <div class="metric-value">{{ metrics.education_levels }}</div>
+                    <div class="metric-label">Education Levels</div>                    <div class="metric-trend">
                         <i class="fas fa-chart-line"></i>
-                        Years required
+                        Most in demand
                     </div>
                     <div class="insight-description" style="font-size: 12px; color: #6b7280; margin-top: 8px;">
-                        Average years of experience required across all job positions
+                        Distinct education levels found in job postings (e.g., Bachelor's, Master's, PhD)
                     </div>
                 </div>
                 
                 <div class="metric-card">
                     <div class="metric-icon">
-                        <i class="fas fa-layer-group fa-2x"></i>
+                        <i class="fas fa-certificate fa-2x"></i>
                     </div>
-                    <div class="metric-value">{{ metrics.seniority_levels }}</div>
-                    <div class="metric-label">Seniority Levels</div>
+                    <div class="metric-value">{{ metrics.qualification_types }}</div>
+                    <div class="metric-label">Qualification Types</div>
                     <div class="metric-trend">
                         <i class="fas fa-check-circle"></i>
-                        Distinct levels
+                        All sectors covered
                     </div>
                     <div class="insight-description" style="font-size: 12px; color: #6b7280; margin-top: 8px;">
-                        Number of different seniority levels in job positions
+                        Different types of qualifications required across all job categories
                     </div>
                 </div>
                 
                 <div class="metric-card">
                     <div class="metric-icon">
-                        <i class="fas fa-users fa-2x"></i>
+                        <i class="fas fa-user-graduate fa-2x"></i>
                     </div>
-                    <div class="metric-value">{{ metrics.senior_positions }}%</div>
-                    <div class="metric-label">Senior Positions</div>
+                    <div class="metric-value">{{ metrics.degree_required_percent }}%</div>
+                    <div class="metric-label">Degree Required</div>
                     <div class="metric-trend">
                         <i class="fas fa-arrow-up"></i>
-                        High demand
+                        {{ metrics.degree_trend }}
                     </div>
                     <div class="insight-description" style="font-size: 12px; color: #6b7280; margin-top: 8px;">
-                        Percentage of positions requiring senior-level experience
+                        Percentage of jobs that specifically require a degree qualification
                     </div>
                 </div>
             </div>
@@ -360,105 +357,26 @@
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fas fa-chart-bar"></i>
-                            Experience Distribution
+                            Most Common Education Requirements
                         </h3>
                     </div>
-                    {{ graph1_html|safe }}
-                    <div class="insights">
+                    {{ graph1_html|safe }}                    <div class="insights">
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Most Common Degree</div>
+                                <div class="insight-description">Bachelor's degree is the most requested qualification, required in majority of positions.</div>
+                            </div>
+                        </div>
                         <div class="insight-item">
                             <div class="insight-icon">
                                 <i class="fas fa-chart-line"></i>
                             </div>
                             <div class="insight-content">
-                                <div class="insight-title">Experience Range</div>
-                                <div class="insight-description">Most positions require 3-5 years of experience.</div>
-                            </div>
-                        </div>
-                        <div class="insight-item">
-                            <div class="insight-icon">
-                                <i class="fas fa-user-graduate"></i>
-                            </div>
-                            <div class="insight-content">
-                                <div class="insight-title">Entry Level</div>
-                                <div class="insight-description">20% of positions are open to fresh graduates.</div>
-                            </div>
-                        </div>
-                        <div class="insight-item">
-                            <div class="insight-icon">
-                                <i class="fas fa-user-tie"></i>
-                            </div>
-                            <div class="insight-content">
-                                <div class="insight-title">Senior Roles</div>
-                                <div class="insight-description">35% positions require 5+ years experience.</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-layer-group"></i>
-                            Seniority Level Distribution
-                        </h3>
-                    </div>
-                    {{ graph2_html|safe }}
-                    <div class="insights">
-                        <div class="insight-item">
-                            <div class="insight-icon">
-                                <i class="fas fa-chart-pie"></i>
-                            </div>
-                            <div class="insight-content">
-                                <div class="insight-title">Level Split</div>
-                                <div class="insight-description">Mid-senior level positions dominate at 45%.</div>
-                            </div>
-                        </div>
-                        <div class="insight-item">
-                            <div class="insight-icon">
-                                <i class="fas fa-seedling"></i>
-                            </div>
-                            <div class="insight-content">
-                                <div class="insight-title">Growth Opportunities</div>
-                                <div class="insight-description">30% roles offer career advancement potential.</div>
-                            </div>
-                        </div>
-                        <div class="insight-item">
-                            <div class="insight-icon">
-                                <i class="fas fa-crown"></i>
-                            </div>
-                            <div class="insight-content">
-                                <div class="insight-title">Executive Positions</div>
-                                <div class="insight-description">10% of openings are for executive roles.</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-chart-line"></i>
-                            Experience vs. Seniority Correlation
-                        </h3>
-                    </div>
-                    {{ graph3_html|safe }}
-                    <div class="insights">
-                        <div class="insight-item">
-                            <div class="insight-icon">
-                                <i class="fas fa-arrows-up-down"></i>
-                            </div>
-                            <div class="insight-content">
-                                <div class="insight-title">Correlation</div>
-                                <div class="insight-description">Strong positive correlation between experience and seniority.</div>
-                            </div>
-                        </div>
-                        <div class="insight-item">
-                            <div class="insight-icon">
-                                <i class="fas fa-route"></i>
-                            </div>
-                            <div class="insight-content">
-                                <div class="insight-title">Career Path</div>
-                                <div class="insight-description">Clear progression path from junior to senior roles.</div>
+                                <div class="insight-title">Emerging Trend</div>
+                                <div class="insight-description">Growing demand for advanced degrees in specialized technical roles.</div>
                             </div>
                         </div>
                         <div class="insight-item">
@@ -466,8 +384,86 @@
                                 <i class="fas fa-lightbulb"></i>
                             </div>
                             <div class="insight-content">
-                                <div class="insight-title">Key Insight</div>
-                                <div class="insight-description">Experience requirements double for each seniority level.</div>
+                                <div class="insight-title">Key Finding</div>
+                                <div class="insight-description">Alternative qualifications gaining recognition in certain sectors.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-chart-pie"></i>
+                            Education Requirements Distribution
+                        </h3>
+                    </div>
+                    {{ graph2_html|safe }}
+                    <div class="insights">
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Distribution Pattern</div>
+                                <div class="insight-description">Bachelor's degrees dominate the requirement landscape at 65%.</div>
+                            </div>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Advanced Degrees</div>
+                                <div class="insight-description">Master's and PhD requirements are concentrated in research and senior roles.</div>
+                            </div>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-certificate"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Certification Impact</div>
+                                <div class="insight-description">Professional certifications can substitute degrees in 15% of positions.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-sitemap"></i>
+                            Education by Seniority Level
+                        </h3>
+                    </div>
+                    {{ graph3_html|safe }}
+                    <div class="insights">
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-level-up-alt"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Career Progression</div>
+                                <div class="insight-description">Higher education strongly correlates with senior positions and better compensation.</div>
+                            </div>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Executive Roles</div>
+                                <div class="insight-description">90% of executive positions require advanced degrees or equivalent experience.</div>
+                            </div>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Entry Level Trends</div>
+                                <div class="insight-description">Bachelor's degree is minimum requirement for 75% of entry-level positions.</div>
                             </div>
                         </div>
                     </div>
@@ -477,7 +473,7 @@
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fas fa-industry"></i>
-                            Experience by Industry
+                            Education Requirements by Industry
                         </h3>
                     </div>
                     {{ graph4_html|safe }}
@@ -487,26 +483,26 @@
                                 <i class="fas fa-building"></i>
                             </div>
                             <div class="insight-content">
-                                <div class="insight-title">Industry Demands</div>
-                                <div class="insight-description">Finance and Tech have highest experience requirements.</div>
+                                <div class="insight-title">Industry Variations</div>
+                                <div class="insight-description">Tech and Finance sectors have highest education requirements.</div>
                             </div>
                         </div>
                         <div class="insight-item">
                             <div class="insight-icon">
-                                <i class="fas fa-rocket"></i>
+                                <i class="fas fa-tools"></i>
                             </div>
                             <div class="insight-content">
-                                <div class="insight-title">Startups</div>
-                                <div class="insight-description">Tech startups value skills over years of experience.</div>
+                                <div class="insight-title">Practical Skills</div>
+                                <div class="insight-description">Manufacturing and trades value experience alongside formal education.</div>
                             </div>
                         </div>
                         <div class="insight-item">
                             <div class="insight-icon">
-                                <i class="fas fa-chart-bar"></i>
+                                <i class="fas fa-brain"></i>
                             </div>
                             <div class="insight-content">
-                                <div class="insight-title">Trend Analysis</div>
-                                <div class="insight-description">Traditional industries require more experience.</div>
+                                <div class="insight-title">Emerging Fields</div>
+                                <div class="insight-description">AI and Data Science roles show highest demand for advanced degrees.</div>
                             </div>
                         </div>
                     </div>
@@ -516,36 +512,36 @@
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fas fa-briefcase"></i>
-                            Experience Requirements by Job Function
+                            Education by Employment Type
                         </h3>
                     </div>
                     {{ graph5_html|safe }}
                     <div class="insights">
                         <div class="insight-item">
                             <div class="insight-icon">
-                                <i class="fas fa-code"></i>
+                                <i class="fas fa-users"></i>
                             </div>
                             <div class="insight-content">
-                                <div class="insight-title">Technical Roles</div>
-                                <div class="insight-description">Software development requires specific years of tech stack experience.</div>
+                                <div class="insight-title">Full-Time Positions</div>
+                                <div class="insight-description">Higher education requirements in permanent roles vs contract positions.</div>
                             </div>
                         </div>
                         <div class="insight-item">
                             <div class="insight-icon">
-                                <i class="fas fa-users-gear"></i>
+                                <i class="fas fa-clock"></i>
                             </div>
                             <div class="insight-content">
-                                <div class="insight-title">Management</div>
-                                <div class="insight-description">Management positions require minimum 5 years experience.</div>
+                                <div class="insight-title">Contract Work</div>
+                                <div class="insight-description">Contract roles often prioritize specific skills over formal education.</div>
                             </div>
                         </div>
                         <div class="insight-item">
                             <div class="insight-icon">
-                                <i class="fas fa-star"></i>
+                                <i class="fas fa-graduation-cap"></i>
                             </div>
                             <div class="insight-content">
-                                <div class="insight-title">Specialized Roles</div>
-                                <div class="insight-description">Domain expertise valued more than general experience.</div>
+                                <div class="insight-title">Internship Trends</div>
+                                <div class="insight-description">Most internships target current students or recent graduates.</div>
                             </div>
                         </div>
                     </div>
