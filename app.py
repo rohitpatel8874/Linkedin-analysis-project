@@ -104,7 +104,7 @@ def job_analysis():
 
 #analysis page routes
 @app.route('/industry_function_insights')
-def industries_by_volume():
+def industry_function_insights():
     # Generate the graphs
     graph1_html = industries_by_job_volume()
     graph2_html = job_functions_within_industries()
@@ -130,30 +130,118 @@ def salary_distribution():
 
 
 
+# Experience & Seniority Analysis Functions
+def plot_experience_distribution():
+    # Experience distribution histogram
+    fig = px.histogram(df, x='months_experience',
+                      nbins=30,
+                      title='Distribution of Experience Requirements',
+                      color_discrete_sequence=['#2563eb'])
+    fig.update_layout(
+        xaxis_title='Months of Experience',
+        yaxis_title='Number of Positions',
+        plot_bgcolor='white',
+        paper_bgcolor='white'
+    )
+    return pio.to_html(fig, full_html=False)
+
+def plot_seniority_distribution():
+    # Seniority level distribution
+    seniority_dist = df['Seniority level'].value_counts().reset_index()
+    seniority_dist.columns = ['Level', 'Count']
+    
+    fig = px.pie(seniority_dist, 
+                 names='Level', 
+                 values='Count',
+                 title='Distribution of Seniority Levels',
+                 hole=0.4)
+    return pio.to_html(fig, full_html=False)
+
+def plot_experience_seniority_correlation():
+    # Box plot of experience by seniority level
+    fig = px.box(df, 
+                 x='Seniority level', 
+                 y='months_experience',
+                 title='Experience Requirements by Seniority Level',
+                 color='Seniority level')
+    fig.update_layout(
+        xaxis_title='Seniority Level',
+        yaxis_title='Months of Experience',
+        xaxis_tickangle=-45
+    )
+    return pio.to_html(fig, full_html=False)
+
+def plot_experience_by_industry():
+    # Average experience by industry
+    ind_exp = df.groupby('Industries')['months_experience'].mean().reset_index()
+    ind_exp = ind_exp.sort_values('months_experience', ascending=False).head(15)
+    
+    fig = px.bar(ind_exp,
+                 x='Industries',
+                 y='months_experience',
+                 title='Average Experience Required by Industry',
+                 color='months_experience',
+                 color_continuous_scale='blues')
+    fig.update_layout(
+        xaxis_title='Industry',
+        yaxis_title='Average Months of Experience',
+        xaxis_tickangle=-45
+    )
+    return pio.to_html(fig, full_html=False)
+
+def plot_experience_by_job_function():
+    # Experience requirements by job function
+    func_exp = df.groupby('Job function')['months_experience'].agg(['mean', 'min', 'max']).reset_index()
+    func_exp = func_exp.sort_values('mean', ascending=False).head(10)
+    
+    fig = px.bar(func_exp,
+                 x='Job function',
+                 y='mean',
+                 title='Experience Requirements by Job Function',
+                 color='mean',
+                 color_continuous_scale='blues',
+                 error_y=dict(
+                     type='data',
+                     symmetric=False,
+                     array=func_exp['max']-func_exp['mean'],
+                     arrayminus=func_exp['mean']-func_exp['min']
+                 ))
+    fig.update_layout(
+        xaxis_title='Job Function',
+        yaxis_title='Months of Experience',
+        xaxis_tickangle=-45
+    )
+    return pio.to_html(fig, full_html=False)
+
 @app.route('/experience_seniority')
 def experience_seniority():
-    graph1_html = salary_ranges_by_job_function()
-    graph2_html = salary_spread_by_seniority_level()
-    graph3_html = salary()
-    graph4_html = experience_vs_salary()
-
-    return render_template('experience_seniority.html', graph1_html=graph1_html, graph2_html=graph2_html, graph3_html=graph3_html)
-
-
-
-@app.route('/education_&_qualification')
-def education_qualification():
-    graph1_html = top_10_most_common_education_requirements()
-    graph2_html = distribution_of_education_requirements()  
-    graph3_html = education_level_within_seniority_levels()
-    graph4_html = education_requirements_across_industries()
-    graph5_html = education_requirements_by_employment_type()
+    # Generate graphs
+    graph1_html = plot_experience_distribution()
+    graph2_html = plot_seniority_distribution()
+    graph3_html = plot_experience_seniority_correlation()
+    graph4_html = plot_experience_by_industry()
+    graph5_html = plot_experience_by_job_function()
     
-
-  
-
-    # Add more graphs as needed
-    return render_template('education_&_qualification.html', graph1_html=graph1_html, graph2_html=graph2_html, graph3_html=graph3_html, graph4_html=graph4_html, graph5_html=graph5_html)
+    # Calculate metrics
+    experience_metrics = {}
+    
+    # Average years of experience required
+    experience_metrics['avg_experience'] = round(df['months_experience'].mean() / 12)
+    
+    # Number of distinct seniority levels
+    experience_metrics['seniority_levels'] = df['Seniority level'].nunique()
+    
+    # Percentage of senior positions
+    senior_roles = df['Seniority level'].str.contains('senior|lead|principal|manager|director', case=False, na=False)
+    experience_metrics['senior_positions'] = round((senior_roles.sum() / len(df)) * 100)
+    
+    return render_template('experience_seniority.html', 
+                         graph1_html=graph1_html,
+                         graph2_html=graph2_html,
+                         graph3_html=graph3_html,
+                         graph4_html=graph4_html,
+                         graph5_html=graph5_html,
+                         metrics=experience_metrics)
 
 
 

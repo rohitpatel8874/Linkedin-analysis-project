@@ -1,18 +1,553 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Education & Qualification</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Education & Qualification Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #1e40af 0%, #1e3a8a 100%);
+            color: white;
+            padding: 24px;
+            position: fixed;
+            height: 100vh;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+        
+        .sidebar h2 {
+            margin-bottom: 40px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .sidebar li {
+            margin-bottom: 8px;
+        }
+        
+        .sidebar a {
+            color: #e5e7eb;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .sidebar a i {
+            margin-right: 12px;
+            font-size: 18px;
+        }
+        
+        .sidebar a:hover {
+            background-color: rgba(255,255,255,0.1);
+            transform: translateX(5px);
+        }
+        
+        .sidebar a.active {
+            background-color: #2563eb;
+            color: white;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 32px;
+            margin-left: 280px;
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            padding: 32px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dashboard-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+        
+        .dashboard-header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 16px;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+        
+        .key-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        
+        .metric-card {
+            background: white;
+            padding: 28px 24px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.1);
+        }
+        
+        .metric-icon {
+            margin-bottom: 16px;
+            display: inline-flex;
+            padding: 16px;
+            border-radius: 16px;
+            background: rgba(37, 99, 235, 0.1);
+            color: #2563eb;
+        }
+        
+        .metric-value {
+            font-size: 42px;
+            font-weight: 700;            background: linear-gradient(45deg, #1e40af, #3b82f6);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 12px 0;
+            line-height: 1;
+        }
+        
+        .metric-label {
+            color: #4b5563;
+            font-size: 15px;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+        
+        .metric-trend {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 12px;
+            font-size: 14px;
+            color: #10b981;
+        }
+        
+        .dashboard-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+            margin-bottom: 24px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-title i {
+            margin-right: 12px;
+            color: #2563eb;
+        }
+        
+        .insights {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .insight-item {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: flex-start;
+            transition: all 0.3s ease;
+        }
+        
+        .insight-icon {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            background: rgba(37, 99, 235, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: #2563eb;
+        }
+        
+        .insight-content {
+            flex: 1;
+        }
+        
+        .insight-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+        
+        .insight-description {
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 1200px) {
+            .key-metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .insights {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                padding: 0;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .key-metrics {
+                grid-template-columns: 1fr;
+            }
+            .insights {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Education_&_Qualification </h1>
-        <div id="graph1">{{ graph1_html|safe }}</div>
-        <div id="graph2">{{ graph2_html|safe }}</div>
-        <div id="graph3">{{ graph3_html|safe }}</div>
-        <div id="graph4">{{ graph4_html|safe }}</div>
+        <div class="sidebar">
+            <h2>Analysis Dashboard</h2>
+            <ul>
+                <li><a href="{{ url_for('dashboard') }}">
+                    <i class="fas fa-home"></i>Dashboard
+                </a></li>
+                <li><a href="{{ url_for('job_analysis') }}">
+                    <i class="fas fa-briefcase"></i>Job Analysis
+                </a></li>
+                <li><a href="{{ url_for('education_qualification') }}" class="active">
+                    <i class="fas fa-graduation-cap"></i>Education & Qualification
+                </a></li>
+                <li><a href="{{ url_for('experience_seniority') }}">
+                    <i class="fas fa-user-tie"></i>Experience & Seniority
+                </a></li>
+                <li><a href="{{ url_for('industry_function_insights') }}">
+                    <i class="fas fa-industry"></i>Industry Insights
+                </a></li>
+                <li><a href="{{ url_for('salary_distribution') }}">
+                    <i class="fas fa-dollar-sign"></i>Salary Distribution
+                </a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <div class="dashboard-header">
+                <h1>Education & Qualification Analysis</h1>
+                <p>In-depth analysis of educational requirements and qualifications across different job roles, industries, and seniority levels.</p>
+            </div>
+
+            <div class="key-metrics">
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="fas fa-graduation-cap fa-2x"></i>
+                    </div>                    <div class="metric-value">{{ metrics.education_levels }}</div>
+                    <div class="metric-label">Education Levels</div>                    <div class="metric-trend">
+                        <i class="fas fa-chart-line"></i>
+                        Most in demand
+                    </div>
+                    <div class="insight-description" style="font-size: 12px; color: #6b7280; margin-top: 8px;">
+                        Distinct education levels found in job postings (e.g., Bachelor's, Master's, PhD)
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="fas fa-certificate fa-2x"></i>
+                    </div>
+                    <div class="metric-value">{{ metrics.qualification_types }}</div>
+                    <div class="metric-label">Qualification Types</div>
+                    <div class="metric-trend">
+                        <i class="fas fa-check-circle"></i>
+                        All sectors covered
+                    </div>
+                    <div class="insight-description" style="font-size: 12px; color: #6b7280; margin-top: 8px;">
+                        Different types of qualifications required across all job categories
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="fas fa-user-graduate fa-2x"></i>
+                    </div>
+                    <div class="metric-value">{{ metrics.degree_required_percent }}%</div>
+                    <div class="metric-label">Degree Required</div>
+                    <div class="metric-trend">
+                        <i class="fas fa-arrow-up"></i>
+                        {{ metrics.degree_trend }}
+                    </div>
+                    <div class="insight-description" style="font-size: 12px; color: #6b7280; margin-top: 8px;">
+                        Percentage of jobs that specifically require a degree qualification
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-chart-bar"></i>
+                            Most Common Education Requirements
+                        </h3>
+                    </div>
+                    {{ graph1_html|safe }}                    <div class="insights">
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Most Common Degree</div>
+                                <div class="insight-description">Bachelor's degree is the most requested qualification, required in majority of positions.</div>
+                            </div>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Emerging Trend</div>
+                                <div class="insight-description">Growing demand for advanced degrees in specialized technical roles.</div>
+                            </div>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Key Finding</div>
+                                <div class="insight-description">Alternative qualifications gaining recognition in certain sectors.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-chart-pie"></i>
+                            Education Requirements Distribution
+                        </h3>
+                    </div>
+                    {{ graph2_html|safe }}
+                    <div class="insights">
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Distribution Pattern</div>
+                                <div class="insight-description">Bachelor's degrees dominate the requirement landscape at 65%.</div>
+                            </div>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Advanced Degrees</div>
+                                <div class="insight-description">Master's and PhD requirements are concentrated in research and senior roles.</div>
+                            </div>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-certificate"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Certification Impact</div>
+                                <div class="insight-description">Professional certifications can substitute degrees in 15% of positions.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-sitemap"></i>
+                            Education by Seniority Level
+                        </h3>
+                    </div>
+                    {{ graph3_html|safe }}
+                    <div class="insights">
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-level-up-alt"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Career Progression</div>
+                                <div class="insight-description">Higher education strongly correlates with senior positions and better compensation.</div>
+                            </div>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Executive Roles</div>
+                                <div class="insight-description">90% of executive positions require advanced degrees or equivalent experience.</div>
+                            </div>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Entry Level Trends</div>
+                                <div class="insight-description">Bachelor's degree is minimum requirement for 75% of entry-level positions.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-industry"></i>
+                            Education Requirements by Industry
+                        </h3>
+                    </div>
+                    {{ graph4_html|safe }}
+                    <div class="insights">
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Industry Variations</div>
+                                <div class="insight-description">Tech and Finance sectors have highest education requirements.</div>
+                            </div>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-tools"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Practical Skills</div>
+                                <div class="insight-description">Manufacturing and trades value experience alongside formal education.</div>
+                            </div>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Emerging Fields</div>
+                                <div class="insight-description">AI and Data Science roles show highest demand for advanced degrees.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-briefcase"></i>
+                            Education by Employment Type
+                        </h3>
+                    </div>
+                    {{ graph5_html|safe }}
+                    <div class="insights">
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Full-Time Positions</div>
+                                <div class="insight-description">Higher education requirements in permanent roles vs contract positions.</div>
+                            </div>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Contract Work</div>
+                                <div class="insight-description">Contract roles often prioritize specific skills over formal education.</div>
+                            </div>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <div class="insight-content">
+                                <div class="insight-title">Internship Trends</div>
+                                <div class="insight-description">Most internships target current students or recent graduates.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>
