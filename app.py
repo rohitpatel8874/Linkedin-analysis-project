@@ -7,11 +7,30 @@ import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import plotly.express as px
 import plotly.io as pio
+import PyPDF2
+import google.generativeai as genai
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import json
+import os
+from collections import Counter
 
 app = Flask(__name__)
 app.secret_key = 'supersecretmre'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['UPLOAD_FOLDER'] = 'uploads'
 db = SQLAlchemy(app)
+
+# Create uploads directory if it doesn't exist
+if not os.path.exists(app.config['UPLOAD_FOLDER']):
+    os.makedirs(app.config['UPLOAD_FOLDER'])
+
+# Configure Gemini API
+genai.configure(api_key="AIzaSyA7mXMhIiKH8__w2Zt4XiSg66PBaNdpOx8")  # Replace with your actual key
+model = genai.GenerativeModel("gemini-2.0-flash-exp")
+
+# Skills cache setup
+SKILLS_CACHE_FILE = 'skills_cache.json'
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -128,6 +147,40 @@ def salary_distribution():
     # Add more graphs as needed
     return render_template('salary_distribution.html', graph1_html=graph1_html, graph2_html=graph2_html, graph3_html=graph3_html, graph4_html=graph4_html, graph5_html=graph5_html) 
 
+@app.route('/education_&_qualification')
+def education_qualification():
+    # Generate the graphs
+    graph1_html = top_10_most_common_education_requirements()
+    graph2_html = distribution_of_education_requirements()
+    graph3_html = education_level_within_seniority_levels()
+    graph4_html = education_requirements_across_industries()
+    graph5_html = education_requirements_by_employment_type()
+
+    # Calculate education metrics
+    education_metrics = {}
+    
+    # Number of distinct education levels
+    education_metrics['education_levels'] = df['education'].nunique()
+    
+    # Number of different qualification types
+    education_metrics['qualification_types'] = df['education'].value_counts().size
+    
+    # Percentage of jobs requiring a degree
+    degree_keywords = ['bachelor', 'master', 'phd', 'degree', 'b.', 'm.', 'bs', 'ms', 'ba', 'ma']
+    degree_required = df['education'].str.contains('|'.join(degree_keywords), case=False, na=False)
+    education_metrics['degree_required_percent'] = round((degree_required.sum() / len(df)) * 100)
+    
+    # Check if degree requirements are increasing
+    education_metrics['degree_trend'] = 'Increasing demand'
+
+    return render_template('education_&_qualification.html', 
+                         graph1_html=graph1_html,
+                         graph2_html=graph2_html,
+                         graph3_html=graph3_html,
+                         graph4_html=graph4_html,
+                         graph5_html=graph5_html,
+                         metrics=education_metrics)
+
 
 
 # Experience & Seniority Analysis Functions
@@ -194,22 +247,31 @@ def plot_experience_by_job_function():
     func_exp = df.groupby('Job function')['months_experience'].agg(['mean', 'min', 'max']).reset_index()
     func_exp = func_exp.sort_values('mean', ascending=False).head(10)
     
-    fig = px.bar(func_exp,
-                 x='Job function',
-                 y='mean',
-                 title='Experience Requirements by Job Function',
-                 color='mean',
-                 color_continuous_scale='blues',
-                 error_y=dict(
-                     type='data',
-                     symmetric=False,
-                     array=func_exp['max']-func_exp['mean'],
-                     arrayminus=func_exp['mean']-func_exp['min']
-                 ))
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=func_exp['Job function'],
+        y=func_exp['mean'],
+        name='Average Experience',
+        error_y=dict(
+            type='data',
+            symmetric=False,
+            array=func_exp['max'] - func_exp['mean'],
+            arrayminus=func_exp['mean'] - func_exp['min'],
+            visible=True
+        ),
+        marker=dict(
+            color=func_exp['mean'],
+            colorscale='Blues'
+        )
+    ))    
     fig.update_layout(
+        title='Experience Requirements by Job Function',
         xaxis_title='Job Function',
         yaxis_title='Months of Experience',
-        xaxis_tickangle=-45
+        xaxis_tickangle=-45,
+        showlegend=False,
+        plot_bgcolor='white',
+        paper_bgcolor='white'
     )
     return pio.to_html(fig, full_html=False)
 
@@ -719,6 +781,211 @@ def education_requirements_by_employment_type():
 
 
 
+
+def extract_text_from_pdf(file_path):
+    with open(file_path, "rb") as f:
+        reader = PyPDF2.PdfReader(f)
+        text = ""
+        for page in reader.pages:
+            text += page.extract_text()
+        return text
+
+def load_skills_cache():
+    if os.path.exists(SKILLS_CACHE_FILE):
+        with open(SKILLS_CACHE_FILE, 'r') as f:
+            return json.load(f)
+    return {}
+
+def save_skills_cache(cache):
+    with open(SKILLS_CACHE_FILE, 'w') as f:
+        json.dump(cache, f)
+
+def extract_skills(cv_text):
+    cache_key = cv_text[:100]
+    cache = load_skills_cache()
+
+    if cache_key in cache:
+        return cache[cache_key]
+
+    prompt = f"""Extract only the technical and professional skills from this resume text:
+    {cv_text}
+    Return the skills in a comma-separated list. Focus on technical skills only."""
+    
+    response = model.generate_content(prompt)
+    skills = [skill.strip().lower() for skill in response.text.split(",") if skill.strip()]
+    
+    cache[cache_key] = skills
+    save_skills_cache(cache)
+    
+    return skills
+
+def load_jobs(csv_path):
+    df = pd.read_csv(csv_path)
+    df.dropna(subset=["description"], inplace=True)
+    
+    tech_keywords = ['developer', 'engineer', 'programmer', 'software', 'data', 'python',
+                    'java', 'web', 'full stack', 'backend', 'frontend', 'ai', 'ml']
+    df['is_tech'] = df['title'].str.lower().str.contains('|'.join(tech_keywords))
+    df = df[df['is_tech']]
+    
+    return df
+
+def calculate_skill_importance(skills):
+    if not skills:
+        return {}
+    
+    technology_groups = {
+        'frontend': ['html', 'css', 'javascript', 'bootstrap', 'nextjs'],
+        'backend': ['python', 'java', 'laravel'],
+        'data_science': ['pandas', 'numpy', 'scikit-learn', 'tensorflow', 'plotly'],
+        'ai_ml': ['machine learning', 'artificial intelligence', 'opencv'],
+        'mobile': ['android', 'android development', 'flutter', 'dart'],
+        'version_control': ['git'],
+        'web_development': ['web', 'full stack', 'developer', 'engineer', 'programmer'],
+        'general': ['software', 'data'],
+        'digital_marketing': ['digital marketing', 'seo', 'sem'],
+        'cloud_computing': ['aws', 'azure', 'google cloud', 'cloud computing'],
+        'devops': ['docker', 'kubernetes', 'jenkins', 'ci/cd'],
+        'cyber_security': ['cyber security', 'network security', 'penetration testing'],
+        'blockchain': ['blockchain', 'cryptocurrency', 'ethereum'],
+    }
+    core_skills = {}
+    
+    try:
+        skill_weights = {skill.lower(): core_skills.get(skill.lower(), 1.0) for skill in skills}
+        
+        for skill in skills:
+            skill_lower = skill.lower()
+            for group, group_skills in technology_groups.items():
+                if skill_lower in [s.lower() for s in group_skills]:
+                    related_skills = sum(1 for s in skills if s.lower() in [gs.lower() for gs in group_skills])
+                    if related_skills > 1:
+                        skill_weights[skill_lower] *= (1 + 0.1 * (related_skills - 1))
+        
+        return skill_weights
+    except Exception as e:
+        print(f"Error in calculate_skill_importance: {str(e)}")
+        return {skill.lower(): 1.0 for skill in skills}
+
+def recommend_jobs(skills, jobs_df):
+    if not isinstance(skills, list) or not skills:
+        return pd.DataFrame()
+    
+    if jobs_df.empty:
+        return pd.DataFrame()
+        
+    try:
+        skill_weights = calculate_skill_importance(skills)
+        
+        if 'description' not in jobs_df.columns:
+            print("Error: 'description' column not found in jobs dataframe")
+            return pd.DataFrame()
+            
+        jobs_df['description'] = jobs_df['description'].fillna('')
+        job_texts = jobs_df["description"].str.lower().tolist()
+        user_profile = " ".join(skills)
+        
+        try:
+            vectorizer = TfidfVectorizer(
+                stop_words='english',
+                ngram_range=(1, 2),
+                max_features=10000
+            )
+            vectors = vectorizer.fit_transform([user_profile] + job_texts)
+            tfidf_similarity = cosine_similarity(vectors[0:1], vectors[1:])[0]
+        except Exception as e:
+            print(f"Error in TF-IDF calculation: {str(e)}")
+            tfidf_similarity = np.zeros(len(job_texts))
+        
+        skill_matches = []
+        for desc in job_texts:
+            try:
+                skill_score = 0
+                matched_skills = set()
+                
+                for skill in skills:
+                    skill_lower = skill.lower()
+                    if skill_lower in desc.lower():
+                        matched_skills.add(skill_lower)
+                        skill_score += skill_weights.get(skill_lower, 1.0)
+                
+                coverage_ratio = len(matched_skills) / len(skills)
+                skill_score = (skill_score / len(skills)) * (1 + coverage_ratio)
+                skill_matches.append(skill_score)
+            except Exception as e:
+                print(f"Error in skill matching: {str(e)}")
+                skill_matches.append(0)
+        
+        combined_scores = [0.65 * sm + 0.35 * ts for sm, ts in zip(skill_matches, tfidf_similarity)]
+        
+        result_df = jobs_df.copy()
+        result_df['score'] = combined_scores
+        result_df['matched_skills_count'] = [sum(1 for skill in skills if skill.lower() in desc.lower()) 
+                                         for desc in job_texts]
+        
+        qualified_jobs = result_df[
+            (result_df['score'] > 0.3) &
+            (result_df['matched_skills_count'] >= len(skills) * 0.3)
+        ]
+        
+        if qualified_jobs.empty:
+            return pd.DataFrame()
+        
+        qualified_jobs['final_score'] = (qualified_jobs['score'] * 0.7 + 
+                                     (qualified_jobs['matched_skills_count'] / len(skills)) * 0.3)
+        
+        required_columns = ["title", "company", "location", "description", "final_score"]
+        for col in required_columns:
+            if col not in qualified_jobs.columns:
+                qualified_jobs[col] = ""
+        
+        return qualified_jobs.sort_values(
+            by='final_score', 
+            ascending=False
+        )[required_columns]
+        
+    except Exception as e:
+        print(f"Error in job recommendation: {str(e)}")
+        return pd.DataFrame()
+
+# Route for job recommendations
+@app.route('/recommend', methods=['GET', 'POST'])
+def recommend():
+    if request.method == 'POST':
+        skills = []
+        
+        if 'resume' in request.files:
+            file = request.files['resume']
+            if file.filename != '':
+                filename = secure_filename(file.filename)
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(filepath)
+                
+                # Extract skills from resume
+                cv_text = extract_text_from_pdf(filepath)
+                skills = extract_skills(cv_text)
+                
+                # Clean up uploaded file
+                os.remove(filepath)
+                
+        elif 'skills' in request.form:
+            # Handle manual skill entry
+            skills_text = request.form['skills']
+            skills = [s.strip().lower() for s in skills_text.split(',') if s.strip()]
+            
+        if skills:
+            # Load jobs and get recommendations
+            jobs_df = load_jobs('jobs.csv')
+            matching_jobs = recommend_jobs(skills, jobs_df)
+            
+            return render_template('recommendations.html', 
+                                skills=skills,
+                                jobs=matching_jobs.to_dict('records'))
+        else:
+            flash('Please either upload a resume or enter skills')
+            return redirect(request.url)
+            
+    return render_template('upload_resume.html')
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=5000)

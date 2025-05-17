@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Resume or Enter Skills{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">Get Job Recommendations</h2>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-warning">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload" type="button" role="tab" aria-controls="upload" aria-selected="true">
+                                Upload Resume
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="manual-tab" data-bs-toggle="tab" data-bs-target="#manual" type="button" role="tab" aria-controls="manual" aria-selected="false">
+                                Enter Skills Manually
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="myTabContent">
+                        <!-- Resume Upload Tab -->
+                        <div class="tab-pane fade show active" id="upload" role="tabpanel" aria-labelledby="upload-tab">
+                            <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                                <div class="mb-3">
+                                    <label for="resume" class="form-label">Select your resume (PDF format)</label>
+                                    <input type="file" class="form-control" id="resume" name="resume" accept=".pdf" required>
+                                    <div class="invalid-feedback">
+                                        Please select a PDF file.
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-primary">Upload and Get Recommendations</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Manual Skills Entry Tab -->
+                        <div class="tab-pane fade" id="manual" role="tabpanel" aria-labelledby="manual-tab">
+                            <form method="POST" class="needs-validation" novalidate>
+                                <div class="mb-3">
+                                    <label for="skills" class="form-label">Enter your skills (comma-separated)</label>
+                                    <textarea class="form-control" id="skills" name="skills" rows="4" placeholder="e.g., Python, Java, Machine Learning, SQL" required></textarea>
+                                    <div class="invalid-feedback">
+                                        Please enter at least one skill.
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-primary">Get Recommendations</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    var forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+});
+</script>
+{% endblock %}
