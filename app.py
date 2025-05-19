@@ -510,90 +510,375 @@ def top_companies():
 
 #industry analysis page routes
 def industries_by_job_volume():
-    fig1 = go.Figure()  
+    # Get top 15 industries
     top_industries = df['Industries'].value_counts().nlargest(15).reset_index()
     top_industries.columns = ['Industry', 'Job Count']
-
-    fig1 = px.bar(top_industries, x='Industry', y='Job Count',
-            title="Top 15 Industries by Job Postings",
-            color='Job Count', text='Job Count')
-    fig1.update_layout(xaxis_tickangle=-45)
-    graph1_html = pio.to_html(fig1, full_html=False)
-    return graph1_html   # Donut style
+    
+    # Create figure with custom styling
+    fig1 = go.Figure()
+    
+    # Add bar trace with gradient colors
+    fig1.add_trace(go.Bar(
+        x=top_industries['Industry'],
+        y=top_industries['Job Count'],
+        text=top_industries['Job Count'],
+        textposition='auto',
+        marker=dict(
+            color=top_industries['Job Count'],
+            colorscale='Blues',
+            line=dict(color='#1e40af', width=1)
+        ),
+        hovertemplate="<b>%{x}</b><br>" +
+                     "Job Count: %{y}<br>" +
+                     "<extra></extra>"
+    ))
+    
+    # Update layout with modern styling
+    fig1.update_layout(
+        title=dict(
+            text="Top 15 Industries by Job Postings",
+            font=dict(size=24, color='#1f2937'),
+            x=0.5,
+            y=0.95
+        ),
+        xaxis=dict(
+            title="Industry",
+            tickangle=-45,
+            tickfont=dict(size=12, color='#4b5563'),
+            gridcolor='#e5e7eb'
+        ),
+        yaxis=dict(
+            title="Number of Jobs",
+            tickfont=dict(size=12, color='#4b5563'),
+            gridcolor='#e5e7eb'
+        ),
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        margin=dict(t=100, b=100),
+        showlegend=False,
+        hovermode='closest'
+    )
+    
+    return pio.to_html(fig1, full_html=False)
 
 
 
 
 # Treemap of Job Functions Within Industries
 def job_functions_within_industries():
-    fig2 = go.Figure()
+    # Prepare data
     treemap_df = df.groupby(['Industries', 'Job function']).size().reset_index(name='Count')
-
-    fig2 = px.treemap(treemap_df, path=['Industries', 'Job function'], values='Count',
-        title="Treemap of Job Functions Within Industries")
-    graph2_html = pio.to_html(fig2, full_html=False) 
-    return graph2_html   # Donut style
+    
+    # Create treemap with custom styling
+    fig2 = px.treemap(
+        treemap_df,
+        path=['Industries', 'Job function'],
+        values='Count',
+        color='Count',
+        color_continuous_scale='Blues',
+        title="Job Functions Distribution Across Industries"
+    )
+    
+    # Update layout with modern styling
+    fig2.update_layout(
+        title=dict(
+            text="Job Functions Distribution Across Industries",
+            font=dict(size=24, color='#1f2937'),
+            x=0.5,
+            y=0.95
+        ),
+        margin=dict(t=100, b=50),
+        paper_bgcolor='white',
+        plot_bgcolor='white'
+    )
+    
+    # Update traces for better hover information
+    fig2.update_traces(
+        hovertemplate="<b>%{label}</b><br>" +
+                     "Count: %{value}<br>" +
+                     "<extra></extra>"
+    )
+    
+    return pio.to_html(fig2, full_html=False)
 
 
 
 
 # Heatmap – Cross-tab of job function vs. industry
 def job_function_vs_industry_heatmap():
-    fig3 = go.Figure()
+    # Prepare data
     heatmap_data = df.groupby(['Job function', 'Industries']).size().reset_index(name='Count')
-    heatmap_pivot = heatmap_data.pivot(index='Job function', columns='Industries', values='Count').fillna(0)
-
-    fig3 = px.imshow(heatmap_pivot,
-                 labels=dict(x="Industry", y="Job Function", color="Job Count"),
-                 title="Heatmap – Job Function by Industry")
-    fig3.update_xaxes(tickangle=-45)
-    graph3_html = pio.to_html(fig3, full_html=False)
-    return graph3_html   # Donut style
+    
+    # Get top 10 job functions and industries by count
+    top_job_functions = df['Job function'].value_counts().nlargest(10).index
+    top_industries = df['Industries'].value_counts().nlargest(10).index
+    
+    # Filter data for top job functions and industries
+    heatmap_data = heatmap_data[
+        heatmap_data['Job function'].isin(top_job_functions) & 
+        heatmap_data['Industries'].isin(top_industries)
+    ]
+    
+    # Create pivot table
+    heatmap_pivot = heatmap_data.pivot(
+        index='Job function', 
+        columns='Industries', 
+        values='Count'
+    ).fillna(0)
+    
+    # Sort rows and columns by total counts
+    row_sums = heatmap_pivot.sum(axis=1)
+    col_sums = heatmap_pivot.sum(axis=0)
+    heatmap_pivot = heatmap_pivot.loc[row_sums.sort_values(ascending=False).index]
+    heatmap_pivot = heatmap_pivot[col_sums.sort_values(ascending=False).index]
+    
+    # Create heatmap with custom styling
+    fig3 = go.Figure(data=go.Heatmap(
+        z=heatmap_pivot.values,
+        x=heatmap_pivot.columns,
+        y=heatmap_pivot.index,
+        colorscale='Blues',
+        showscale=True,
+        hoverongaps=False,
+        hovertemplate="<b>Industry:</b> %{x}<br>" +
+                     "<b>Job Function:</b> %{y}<br>" +
+                     "<b>Number of Jobs:</b> %{z}<br>" +
+                     "<extra></extra>"
+    ))
+    
+    # Update layout with modern styling
+    fig3.update_layout(
+        title=dict(
+            text="Top 10 Job Functions vs Industries Distribution",
+            font=dict(size=24, color='#1f2937'),
+            x=0.5,
+            y=0.95
+        ),
+        xaxis=dict(
+            title="Industry",
+            tickangle=-45,
+            tickfont=dict(size=12, color='#4b5563'),
+            gridcolor='#e5e7eb',
+            showgrid=False
+        ),
+        yaxis=dict(
+            title="Job Function",
+            tickfont=dict(size=12, color='#4b5563'),
+            gridcolor='#e5e7eb',
+            showgrid=False
+        ),
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        margin=dict(t=100, b=100, l=150, r=50),
+        height=700,
+        width=900
+    )
+    
+    # Update colorbar
+    fig3.update_traces(
+        colorbar=dict(
+            title=dict(
+                text="Number of Jobs",
+                font=dict(size=12, color='#4b5563')
+            ),
+            tickfont=dict(size=10, color='#4b5563')
+        )
+    )
+    
+    return pio.to_html(fig3, full_html=False)
 
 
 
 # Bubble Chart – Job function popularity (size = number of postings)
 def job_function_popularity():
-    fig4 = go.Figure()
+    # Prepare data
     job_function_count = df['Job function'].value_counts().reset_index()
     job_function_count.columns = ['Job Function', 'Count']
-
-    fig4 = px.scatter(job_function_count, x='Job Function', y='Count',
-                  size='Count', color='Job Function',
-                  title="Job Function Popularity",
-                  size_max=60)
-    fig4.update_layout(xaxis_tickangle=-45)
-    graph4_html = pio.to_html(fig4, full_html=False)
-    return graph4_html   # Donut style
+    
+    # Sort data by count for better visualization
+    job_function_count = job_function_count.sort_values('Count', ascending=True)
+    
+    # Create bubble chart with custom styling
+    fig4 = go.Figure()
+    
+    fig4.add_trace(go.Bar(
+        x=job_function_count['Count'],
+        y=job_function_count['Job Function'],
+        orientation='h',
+        marker=dict(
+            color=job_function_count['Count'],
+            colorscale='Blues',
+            line=dict(color='#1e40af', width=1)
+        ),
+        text=job_function_count['Count'],
+        textposition='auto',
+        hovertemplate="<b>%{y}</b><br>" +
+                     "Number of Jobs: %{x}<br>" +
+                     "<extra></extra>"
+    ))
+    
+    # Update layout with modern styling
+    fig4.update_layout(
+        title=dict(
+            text="Job Function Popularity",
+            font=dict(size=24, color='#1f2937'),
+            x=0.5,
+            y=0.95
+        ),
+        xaxis=dict(
+            title="Number of Jobs",
+            tickfont=dict(size=12, color='#4b5563'),
+            gridcolor='#e5e7eb',
+            showgrid=True
+        ),
+        yaxis=dict(
+            title="",
+            tickfont=dict(size=12, color='#4b5563'),
+            gridcolor='#e5e7eb',
+            showgrid=False
+        ),
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        margin=dict(t=100, b=50, l=200, r=50),
+        showlegend=False,
+        height=600,
+        bargap=0.3
+    )
+    
+    return pio.to_html(fig4, full_html=False)
 
 
 
 #Pie Chart – Share of top 10 job functions
 def job_function_share():
-    fig5 = go.Figure()
+    # Prepare data
     top_functions = df['Job function'].value_counts().nlargest(10).reset_index()
     top_functions.columns = ['Job Function', 'Count']
-
-    fig5 = px.pie(top_functions, names='Job Function', values='Count',
-              title="Top 10 Job Functions Distribution")
-    graph5_html = pio.to_html(fig5, full_html=False)
-    return graph5_html   # Donut style
+    
+    # Create pie chart with custom styling
+    fig5 = go.Figure()
+    
+    fig5.add_trace(go.Pie(
+        labels=top_functions['Job Function'],
+        values=top_functions['Count'],
+        hole=0.4,
+        marker=dict(
+            colors=px.colors.sequential.Blues,
+            line=dict(color='white', width=1)
+        ),
+        hovertemplate="<b>%{label}</b><br>" +
+                     "Count: %{value}<br>" +
+                     "Percentage: %{percent}<br>" +
+                     "<extra></extra>"
+    ))
+    
+    # Update layout with modern styling
+    fig5.update_layout(
+        title=dict(
+            text="Top 10 Job Functions Distribution",
+            font=dict(size=24, color='#1f2937'),
+            x=0.5,
+            y=0.95
+        ),
+        showlegend=True,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.2,
+            xanchor="center",
+            x=0.5
+        ),
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        margin=dict(t=100, b=100)
+    )
+    
+    return pio.to_html(fig5, full_html=False)
 
 
 
 
 # Box Plot – Salary Ranges by Job Function
 def salary_ranges_by_job_function():
-    fig1 = go.Figure()
+    # Prepare data
     df['sal_low'] = pd.to_numeric(df['sal_low'], errors='coerce')
     df['sal_high'] = pd.to_numeric(df['sal_high'], errors='coerce')
     df['avg_salary'] = (df['sal_low'] + df['sal_high']) / 2
-    fig1 = px.box(df, x='Job function', y='avg_salary', points='all',
-              title='Salary Ranges by Job Function',
-              color='Job function')
-    fig1.update_layout(xaxis_tickangle=-45, yaxis_title='Average Salary')
-    graph1_html = pio.to_html(fig1, full_html=False)
-    return graph1_html   # Donut style
+    
+    # Get top 10 job functions by count
+    top_job_functions = df['Job function'].value_counts().nlargest(10).index
+    
+    # Filter data for top job functions
+    salary_data = df[df['Job function'].isin(top_job_functions)].copy()
+    
+    # Create box plot with custom styling
+    fig1 = go.Figure()
+    
+    # Add box plot trace
+    fig1.add_trace(go.Box(
+        x=salary_data['Job function'],
+        y=salary_data['avg_salary'],
+        name='Salary Range',
+        boxpoints='outliers',
+        marker=dict(
+            color='#3b82f6',
+            outliercolor='#ef4444',
+            line=dict(color='#1e40af')
+        ),
+        boxmean=True,
+        hovertemplate="<b>%{x}</b><br>" +
+                     "Median: %{median}<br>" +
+                     "Q1: %{q1}<br>" +
+                     "Q3: %{q3}<br>" +
+                     "Min: %{lowerfence}<br>" +
+                     "Max: %{upperfence}<br>" +
+                     "<extra></extra>"
+    ))
+    
+    # Update layout with modern styling
+    fig1.update_layout(
+        title=dict(
+            text="Salary Ranges by Job Function",
+            font=dict(size=24, color='#1f2937'),
+            x=0.5,
+            y=0.95
+        ),
+        xaxis=dict(
+            title="Job Function",
+            tickangle=-45,
+            tickfont=dict(size=12, color='#4b5563'),
+            gridcolor='#e5e7eb',
+            showgrid=False
+        ),
+        yaxis=dict(
+            title="Average Salary",
+            tickfont=dict(size=12, color='#4b5563'),
+            gridcolor='#e5e7eb',
+            showgrid=True,
+            tickprefix="$",
+            tickformat=",.0f"
+        ),
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        margin=dict(t=100, b=100, l=100, r=50),
+        height=700,
+        width=1000,
+        showlegend=False
+    )
+    
+    # Add annotations for median values
+    for job_function in top_job_functions:
+        median_salary = salary_data[salary_data['Job function'] == job_function]['avg_salary'].median()
+        fig1.add_annotation(
+            x=job_function,
+            y=median_salary,
+            text=f"${median_salary:,.0f}",
+            showarrow=False,
+            font=dict(size=10, color='#1f2937'),
+            yshift=10
+        )
+    
+    return pio.to_html(fig1, full_html=False)
 
 
 
@@ -645,16 +930,82 @@ def experience_vs_salary():
 
 # Bar Chart – Top 15 Highest Paying Job Titles
 def top_15_highest_paying_job_titles():
-    fig5 = go.Figure()
-    title_salary = df.groupby('title')['avg_salary'].mean().nlargest(15).reset_index()
-
-    fig5 = px.bar(title_salary, x='title', y='avg_salary',
-              title='Top 15 Highest Paying Job Titles',
-              color='avg_salary', text='avg_salary')
-    fig5.update_layout(xaxis_tickangle=-45, yaxis_title='Average Salary')
+    # Prepare data
+    df['sal_low'] = pd.to_numeric(df['sal_low'], errors='coerce')
+    df['sal_high'] = pd.to_numeric(df['sal_high'], errors='coerce')
+    df['avg_salary'] = (df['sal_low'] + df['sal_high']) / 2
     
-    graph5_html = pio.to_html(fig5, full_html=False)
-    return graph5_html   # Donut style
+    # Calculate average salary by job title and get top 15
+    title_salary = df.groupby('title')['avg_salary'].agg(['mean', 'count']).reset_index()
+    title_salary = title_salary[title_salary['count'] >= 5]  # Filter for titles with at least 5 postings
+    title_salary = title_salary.nlargest(15, 'mean')
+    
+    # Create horizontal bar chart with custom styling
+    fig5 = go.Figure()
+    
+    # Add bar trace
+    fig5.add_trace(go.Bar(
+        x=title_salary['mean'],
+        y=title_salary['title'],
+        orientation='h',
+        marker=dict(
+            color=title_salary['mean'],
+            colorscale='Blues',
+            line=dict(color='#1e40af', width=1)
+        ),
+        text=title_salary['mean'].round(0).astype(int),
+        texttemplate='$%{text:,.0f}',
+        textposition='auto',
+        hovertemplate="<b>%{y}</b><br>" +
+                     "Average Salary: $%{x:,.0f}<br>" +
+                     "Number of Postings: %{customdata}<br>" +
+                     "<extra></extra>",
+        customdata=title_salary['count']
+    ))
+    
+    # Update layout with modern styling
+    fig5.update_layout(
+        title=dict(
+            text="Top 15 Highest Paying Job Titles",
+            font=dict(size=24, color='#1f2937'),
+            x=0.5,
+            y=0.95
+        ),
+        xaxis=dict(
+            title="Average Salary",
+            tickfont=dict(size=12, color='#4b5563'),
+            gridcolor='#e5e7eb',
+            showgrid=True,
+            tickprefix="$",
+            tickformat=",.0f"
+        ),
+        yaxis=dict(
+            title="",
+            tickfont=dict(size=12, color='#4b5563'),
+            gridcolor='#e5e7eb',
+            showgrid=False
+        ),
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        margin=dict(t=100, b=50, l=200, r=50),
+        height=700,
+        width=1000,
+        showlegend=False,
+        bargap=0.3
+    )
+    
+    # Add annotations for number of postings
+    for i, row in title_salary.iterrows():
+        fig5.add_annotation(
+            x=row['mean'] + 5000,  # Offset from the end of the bar
+            y=row['title'],
+            text=f"({int(row['count'])} postings)",
+            showarrow=False,
+            font=dict(size=10, color='#6b7280'),
+            xanchor='left'
+        )
+    
+    return pio.to_html(fig5, full_html=False)
 
 # Graph 4
 

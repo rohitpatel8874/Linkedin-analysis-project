@@ -1,46 +1,73 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<!-- ========== HEADER ========== -->
-<div class="flex items-center justify-center min-h-screen bg-cover bg-center" 
-    style="background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\' viewBox=\'0 0 800 400\'><rect fill=\'%23330000\' width=\'800\' height=\'400\'/><defs><radialGradient id=\'a\' cx=\'396\' cy=\'281\' r=\'514\' gradientUnits=\'userSpaceOnUse\'><stop offset=\'0\' stop-color=\'%23D18\'/><stop offset=\'1\' stop-color=\'%23330000\'/></radialGradient><linearGradient id=\'b\' gradientUnits=\'userSpaceOnUse\' x1=\'400\' y1=\'148\' x2=\'400\' y2=\'333\'><stop offset=\'0\' stop-color=\'%23FA3\' stop-opacity=\'0\'/><stop offset=\'1\' stop-color=\'%23FA3\' stop-opacity=\'0.5\'/></linearGradient></defs><rect fill=\'url(%23a)\' width=\'800\' height=\'400\'/><g fill-opacity=\'0.5\'><circle fill=\'url(%23b)\' cx=\'267.5\' cy=\'61\' r=\'300\'/><circle fill=\'url(%23b)\' cx=\'532.5\' cy=\'61\' r=\'300\'/><circle fill=\'url(%23b)\' cx=\'400\' cy=\'30\' r=\'300\'/></g></svg>');">
-    
-    <div class="w-full max-w-md p-8 bg-[#bdbbb6] backdrop-blur-md shadow-lg rounded-xl">
-        <div class="text-center">
-            <h1 class="text-3xl font-bold text-gray-800">Sign in</h1>
-            <p class="mt-2 text-sm text-gray-600">
-                Don't have an account yet? 
-                <a href="#" class="text-blue-600 hover:underline font-medium">Sign up here</a>
-            </p>
+<!-- ========== LOGIN PAGE ========== -->
+<div class="relative min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 overflow-hidden">
+    <!-- Animated background elements -->
+    <div class="absolute inset-0">
+        <div class="absolute inset-0 bg-gradient-to-br from-gray-900/90 via-blue-900/90 to-indigo-900/90"></div>
+        <!-- Animated shapes -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+            <!-- Animated particles -->
+            <div class="particles-container"></div>
+            <!-- Gradient orbs -->
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
         </div>
-
-        <form class="space-y-4" method="POST">
-            <div>
-                <label for="username" class="block text-sm font-medium text-gray-700">Email or Username</label>
-                <input type="username" id="username" name="username" class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" required>
-            </div>
-
-            <div>
-                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                <input type="password" id="password" name="password" class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" required>
-                <a href="#" class="block mt-2 text-sm text-blue-600 hover:underline">Forgot password?</a>
-            </div>
-
-            <div class="flex items-center">
-                <input type="checkbox" id="remember" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                <label for="remember" class="ml-2 text-sm text-gray-700">Remember me</label>
-            </div>
-
-            <button type="submit" class="w-full py-3 text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg transition">Sign in</button>
-        </form>
     </div>
 
+    <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
+        <div class="w-full max-w-md">
+            <!-- Card Container -->
+            <div class="bg-white/10 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/20">
+                <div class="text-center mb-8">
+                    <h1 class="text-4xl font-bold text-white mb-2">Welcome Back</h1>
+                    <p class="text-gray-300">
+                        Don't have an account yet? 
+                        <a href="/register" class="text-blue-400 hover:text-blue-300 font-medium transition-colors">Sign up here</a>
+                    </p>
+                </div>
+
+                <!-- Login Form -->
+                <form class="space-y-6" method="POST">
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-300 mb-2">Email or Username</label>
+                        <input type="username" id="username" name="username" 
+                            class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" 
+                            placeholder="Enter your email or username" required>
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                        <input type="password" id="password" name="password" 
+                            class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" 
+                            placeholder="Enter your password" required>
+                        <a href="#" class="block mt-2 text-sm text-blue-400 hover:text-blue-300 transition-colors">Forgot password?</a>
+                    </div>
+
+                    <div class="flex items-center">
+                        <input type="checkbox" id="remember" 
+                            class="w-4 h-4 text-blue-600 border-white/20 rounded focus:ring-blue-500 bg-white/5">
+                        <label for="remember" class="ml-2 text-sm text-gray-300">Remember me</label>
+                    </div>
+
+                    <button type="submit" 
+                        class="w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-[1.02] focus:scale-[0.98]">
+                        Sign In
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
+
 {% endblock %}
+
 {% block js %}
 <script>
-
+    // Add form validation or interactivity if needed
 </script>
-
-
 {% endblock %}
